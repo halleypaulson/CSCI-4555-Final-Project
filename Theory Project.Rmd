@@ -1,0 +1,18 @@
+---
+title: "Theory Project"
+author: "Halley Paulson and Machi Iwata"
+date: "4/18/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+https://archive.ics.uci.edu/ml/datasets/wine+quality
+https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/
+```{r}
+red_wine = read.csv('winequality-red.csv', sep=';')
+white_wine = read.csv('winequality-white.csv', sep=';')
+```
+
