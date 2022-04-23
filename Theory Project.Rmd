@@ -36,14 +36,12 @@ white_wine = read.csv('wine_data/winequality-white.csv', sep=';')
 
 ```
 
-##Preprocessing
+##Preprocessing and creating sets
 ```{r}
 wine_data = subset(white_wine, select = -c(fixed.acidity,chlorides,free.sulfur.dioxide,density))
 
-```
+wine_data$quality = as.numeric(wine_data$quality)
 
-##Splitting into Training and Testing
-```{r}
 sample_size = 3918 #80% of full set for training, 20% for testing
 set.seed(4898)
 
@@ -51,14 +49,15 @@ tmp = sample(seq_len(nrow(wine_data)),size = sample_size)
 training = wine_data[tmp,]
 testing = wine_data[-tmp,]
 
-training_data = subset(training, select = -c(quality))
-training_labels = subset(training, select = c(quality))
+training_data = as.matrix(subset(training, select = -c(quality)))
+training_labels = as.matrix(subset(training, select = c(quality)))
 
-testing_data = subset(testing, select = -c(quality))
-testing_labels = subset(testing, select = c(quality))
+testing_data = as.matrix(subset(testing, select = -c(quality)))
+testing_labels = as.matrix(subset(testing, select = c(quality)))
 
-summary(training_labels)
-summary(training_data)
+#normalizing features since features had different ranges
+training_data = scale(training_data)
+testing_data = scale(testing_data)
 ```
 
 #Building the model
@@ -66,36 +65,42 @@ summary(training_data)
 model = keras_model_sequential() %>%
   layer_dense(units = 50, activation = "relu", input_shape = ncol(training_data)) %>%
   layer_dense(units = 50, activation = "relu") %>%
+  layer_dense(units = 50, activation = "relu") %>%
+  layer_dense(units = 50, activation = "relu") %>%
   layer_dense(units = ncol(training_labels), activation = "linear")
 
 model %>% compile(
-  loss = 'mse',
+  loss = 'mean_squared_error', #changing this from mean_absolute_error didn't change the loss measurement, but this is the ideal loss function
   optimizer = 'adam',
-  metrics = c("accuracy")
-)
-#summary(model)
-```
+) #how do we add back propagation? or drop rates?
 
-```{r}
-#I don't get what's wrong with this
+summary(model)
+
 model %>% 
   fit(
-    x = as.matrix(training_data),
+    x = training_data,
     y = training_labels,
-    epochs = 10,
+    epochs = 25, #increased from 10
   )
 
 ```
+Loss decreased with another layer and more epochs, but it doesn't change the actual predictions much. How can we improve the accuracy and reduce the loss? Maybe adding a drop rate or implementing back propagation if that isn't already happening.
 
 ## Evaluating the model
 ```{r}
 model %>% evaluate(testing_data, testing_labels)
 
-# Predicting likelihood of all categories:
-result <- model %>% predict(testing_data)
+predictions = model %>% predict(testing_data)
+comparison = data.frame(cbind(actual=testing_labels,predicted=predictions))
+colnames(comparison) = c('Actual','Predicted')
 
-result
+head(comparison)
+summary(comparison) #looks like it's not so good at predicting lower or higher, but good at predicting around the median
+
 ```
+
+
+
 
 
 
