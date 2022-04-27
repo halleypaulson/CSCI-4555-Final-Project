@@ -4,7 +4,7 @@ Elena Machkasova
 
 
 # Project Background
-The purpose of this study is to generate insights into each of the factors in our model's white wine quality and to determine which features of white (red) wines are establishing the quality indicators. According to this website, there are over 10,000 wine varieties in the world, even considering only the grapes kinds, therefore, for many people, figuring out which wine is a good quality wine can be difficult. By using a neural network, we can build regression model and classification model to predict whether a particular wine is good quality or not. For this project, we used the data from the website of the UCI Machine Learning Repository. (https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/). Our hypotheses for this topic are that 
+The purpose of this study is to generate insights into each of the factors in our model's white wine quality and to determine which features of white (red) wines are establishing the quality indicators. According to this website, there are over 10,000 wine varieties in the world, even considering only the grapes kinds, therefore, for many people, figuring out which wine is a good quality wine can be difficult. By using a neural network, we build regression model and classification model to predict whether a particular wine is good quality or not. For this project, we used the data from the website of the UCI Machine Learning Repository. (https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/). Our hypotheses for this topic are that 
 
 
 # Data Description
@@ -24,7 +24,7 @@ There are 12 features in the dataset to determine whether the quality of white w
 11. **alcohol**: the percent alcohol content of the wine
 12. **quality**: score between 0 and 10.
 
-We did not find any missing data and we have 58,776 elements in the dataset. We created a correlation plot to determine which features are highly correlated to the variable "quality". With this correlation plot, we can see which features are correlated to the quality. Even the variable which has the highest correlation with quality does not show the strong correlation which the number is 0.44 and the variable is alcohol, so we decided to use all the features for this project.
+We did not find any missing data and we have 58,776 elements in the dataset. We created a correlation plot to determine which features are highly correlated to the variable "quality". With this correlation plot, we can see which features are correlated to the quality. Even the variable which has the highest correlation with quality does not show the strong correlation which the number is 0.44 and the variable is alcohol, so we decided to use all the features for this project. We are using **quality** as labels because we want to predict the quality of wine. 
 
 <!-- alcohol, volatile.acidity. sulphates total.sulfur.dioxide might be the top features we want to have-->
 
@@ -36,14 +36,12 @@ corPlot(white_wine)
 
 # Method
 In this project, we are using multilayer perceptron for neural network to predict the white wine quality. <!-- I need your help with the "why" part-->
-At first, we had to normalize features because our features had different rages, and we used scale() function to do that. Then we built our model based on training set (80% of full-set). We randomly split the dataset into 2 sets which are training set and testing set, and the training set contains 80% of full-set and the testing set has 20%.  
-
-
-
+At first, we had to normalize features because our features had different rages, and we used scale() function to do that. Then we built our model based on training set. We randomly split the dataset into 2 sets which are training set and testing set, and the training set contains 80% of full-set and the testing set has 20%.  
 
 
 # Result
 
+# Challenges
 
 
 
