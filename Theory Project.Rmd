@@ -32,7 +32,7 @@ white_wine = read.csv('wine_data/winequality-white.csv', sep=';')
 ```{r}
 wine_data = white_wine
 labels = data.frame(as.numeric(wine_data$quality))
-wine_data = scale(subset(wine_data,select=-c(quality,chlorides,free.sulfur.dioxide,density))) #removed features with big ranges
+wine_data = scale(subset(wine_data,select=-c(quality)))
 summary(wine_data)
  
 sample_size = 3918 #80% of full set for training, 20% for testing
