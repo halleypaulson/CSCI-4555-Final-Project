@@ -1,5 +1,5 @@
-Halley Paulson and Machi Iwata
-
+Halley Paulson and Machi Iwata  
+CSCI 4555  
 Elena Machkasova
 
 
@@ -43,9 +43,16 @@ In both the regression and classification versions of our model, ReLU was used a
 
 In both version of the model, an Adam optimizer was used because it is the best optimizer in most situations. For the regression model, the Mean Squared Error was used for the loss as this measures the mean squared difference between the predicted and actual value. So, the smaller the loss the better our model would be predicting. For the classification model, Categorical Crossentropy was used as the loss function to suit the nature of the predictions. Instead of just loss, we measured accuracy as well for this version of the model.  
 
-Classification Model:
+## Process
+The classification model was a pretty close copy to the regression model and many of the trials of getting to that point were done on the regression model.
 
-# Result
+In the begining, we first started with a basic model with 3 layers, and unprocessed data. It was clear that we needed some type of normalization right away. Our loss was not decreasing steadily, but instead jumping around. After normalizing our data, we saw smooth and steady changes to our loss. Once that was solved, we tried adding more hidden layers and increasing the amount of nodes in each layer. At one point, we had 4 hidden layers each with 100 nodes and it was a bit much. Since we had so much data, we found it was benefitial to have more nodes in our layers so we stayed at 100 nodes for each layer. However, we reduced the total hidden layers to 2 since we didn't see much change by adding more and it took a lot of time to train with that many layers.
+
+For our regression model, we tried two different loss functions. At first we tried the Mean Absolute Error, which didn't seem too different from the Mean Squared Error, but after some research we found that it was common for regression models to use the Mean Squared Error more. Our classification model was based off of an example provided by Elena and we left it unchanged due to the high performance of her example model. We never changed the optimizer because the Adam optimizer is highly recomended.
+
+We tried different combinations of epochs and batch sizes for training and found that the more epochs there were, the better our training metrics were at the end. At one point, our batch size was 15 and our epochs were 60. Our regression model was performing really well, with loss as low as 0.12. We hit a road block when our evaluated loss wasn't matching the loss measured at the end of training. Because of this, we had to retry node amounts, layer amounts, epochs, and batch sizes. We even tried adding drop out rates to no success. What helped match our results was regularization in the hidden layers. We used L1 and L2 regularization in the regression model and only L1 in the classification. While this helped us finally see our evaluated loss match the loss measured after training, we sadly saw an increase in our loss in both models. With our loss stabilizing after a few epochs, we defaulted to a batch size of 32 with 50 epochs. It was still necessary to have a high amount of epochs, but we didn't want to overdo it.
+
+# Results
 
 # Challenges
 
