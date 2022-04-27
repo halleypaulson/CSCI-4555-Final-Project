@@ -24,7 +24,8 @@ There are 12 features in the dataset to determine whether the quality of white w
 11. **alcohol**: the percent alcohol content of the wine
 12. **quality**: score between 0 and 10.
 
-We are using the **quality** column as our labels and predictor variable. We did not find any missing data and we had 4,898 elements in the dataset. We created a correlation plot to determine which features were highly correlated to the predictor variable, but did not find anything that stood out. We decided to use all the available features in the data for training and testing, excluding our labels, in the hopes that the more data there was the better it would predict. 
+![image2](https://github.com/halleypaulson/CSCI-4555-Final-Project/blob/main/design_matrix_sample.png)
+We are using the **quality** column as our labels and predictor variable. We did not find any missing data and we had 4,898 elements in the dataset. We created a correlation plot to determine which features were highly correlated to the predictor variable, but did not find anything that stood out. We decided to use all the available features in the data for training and testing, excluding our labels, in the hopes that the more data there was the better it would predict. We also scaled all of our features, excluding our predictor variable, to better fit a normal distribution.
 
 ```{r}
 white_wine = read.csv('wine_data/winequality-white.csv', sep=';')
@@ -34,9 +35,15 @@ corPlot(white_wine)
 ![image1](https://github.com/halleypaulson/CSCI-4555-Final-Project/blob/main/correlation.png)
 
 # Method
-In this project, we are using multilayer perceptron for neural network to predict the white wine quality. <!-- I need your help with the "why" part-->
-At first, we had to normalize features because our features had different rages, and we used scale() function to do that. Then we built our model based on training set. We randomly split the dataset into 2 sets which are training set and testing set, and the training set contains 80% of full-set and the testing set has 20%.  
+In this project, we are using multilayer perceptron to allow for deep learning. We chose to use a more complicated model because feed-forward neural networks do not have enough layers or connections to allow for accurate predictions. We needed a model that performed back-propogation. 
 
+For the regression model, the training data was 80% of the total data frame and the testing data was the rest. This was because we assumed this split was best practice. For the classification model we used about 62% of the total data frame for the training data and the rest for testing to see if having more testing data would help the evaluation of the model.
+
+In both the regression and classification versions of our model, ReLU was used as the activation function in all the layers except the output layer. In our regression model, the output layer used a linear activation function and in our classification model, the Softmax activation funciton was used. ReLU was used because it is currently the 'go-to' activation function for many models. Linear and Softmax activation functions were used in order to fit the type of prediction we wanted; numerical for regression and category for categorical.
+
+In both version of the model, an Adam optimizer was used because it is the best optimizer in most situations. For the regression model, the Mean Squared Error was used for the loss as this measures the mean squared difference between the predicted and actual value. So, the smaller the loss the better our model would be predicting. For the classification model, Categorical Crossentropy was used as the loss function to suit the nature of the predictions. Instead of just loss, we measured accuracy as well for this version of the model.  
+
+Classification Model:
 
 # Result
 
