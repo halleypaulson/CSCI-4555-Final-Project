@@ -30,25 +30,19 @@ white_wine = read.csv('wine_data/winequality-white.csv', sep=';')
 #Regression Model
 ##Preprocessing and creating sets
 ```{r}
-wine_data = white_wine #tried with full set of features and half and it didn't effect loss much. Decided to keep full set
-wine_data$quality = as.numeric(wine_data$quality)
-
+wine_data = white_wine
+labels = data.frame(as.numeric(wine_data$quality))
+wine_data = scale(subset(wine_data,select=-c(quality,chlorides,free.sulfur.dioxide,density))) #removed features with big ranges
+summary(wine_data)
+ 
 sample_size = 3918 #80% of full set for training, 20% for testing
 set.seed(4898)
 
 tmp = sample(seq_len(nrow(wine_data)),size = sample_size)
-training = wine_data[tmp,]
-testing = wine_data[-tmp,]
-
-training_data = as.matrix(subset(training, select = -c(quality)))
-training_labels = as.matrix(subset(training, select = c(quality)))
-
-testing_data = as.matrix(subset(testing, select = -c(quality)))
-testing_labels = as.matrix(subset(testing, select = c(quality)))
-
-#normalizing features since features had different ranges. Trying without results in high loss, but the training loss and evaluation loss are now the same?
-training_data = scale(training_data)
-testing_data = scale(testing_data)
+training_data = as.matrix(wine_data[tmp,])
+training_labels = as.matrix(labels[tmp,])
+testing_data = as.matrix(wine_data[-tmp,])
+testing_labels = as.matrix(labels[-tmp,])
 ```
 
 #Building and evaluating the model
@@ -56,8 +50,8 @@ testing_data = scale(testing_data)
 #Adding more layers didn't change much, adding more nodes helped decrease loss by around .2, dropout made it perform worse
 model = keras_model_sequential() %>%
   layer_dense(units = 100, activation = "relu", input_shape = ncol(training_data)) %>%
-  layer_dense(units = 100, activation = "relu") %>%
-  layer_dense(units = 100, activation = "relu") %>%
+  layer_dense(units = 100, activation = "relu", kernel_regularizer=keras$regularizers$L1L2(0.01,0.01)) %>%
+  layer_dense(units = 100, activation = "relu",kernel_regularizer=keras$regularizers$L1L2(0.01,0.01)) %>%
   layer_dense(units = 100, activation = "relu") %>%
   layer_dense(units = ncol(training_labels), activation = "linear")
 
@@ -72,11 +66,11 @@ model %>%
 fit(
   x = training_data,
   y = training_labels,
-  epochs = 60, #trials showed that more epochs = lower loss
-  batch_size = 15 #smaller batches in combination with high epochs was beneficial
+  epochs = 50, #trials showed that more epochs = lower loss
+   #smaller batches in combination with high epochs was beneficial
 )
 
-model %>% evaluate(testing_data,testing_labels) #training loss is around .1 but evaluated loss is around .5, why?
+model %>% evaluate(testing_data,testing_labels)
 
 predictions = model %>% predict(testing_data)
 comparison = data.frame(cbind(actual=testing_labels,predicted=predictions))
@@ -88,25 +82,18 @@ head(comparison)
 #Classification Model
 ##Preprocessing and creating sets
 ```{r}
-wine_data = white_wine
-wine_data$quality = to_categorical(wine_data$quality)
-
-sample_size = 3918 #80% of full set for training, 20% for testing
+wine_data = white_wine #tried with full set of features and half and it didn't effect loss much. Decided to keep full set
+labels = data.frame(to_categorical(wine_data$quality))
+wine_data = scale(subset(wine_data,select=-c(quality)))
+ 
+sample_size = 3000 #80% of full set for training, 20% for testing
 set.seed(4898)
 
 tmp = sample(seq_len(nrow(wine_data)),size = sample_size)
-training = wine_data[tmp,]
-testing = wine_data[-tmp,]
-
-training_data = as.matrix(subset(training, select = -c(quality)))
-training_labels = as.matrix(subset(training, select = c(quality)))
-
-testing_data = as.matrix(subset(testing, select = -c(quality)))
-testing_labels = as.matrix(subset(testing, select = c(quality)))
-
-#normalizing features since features had different ranges
-training_data = scale(training_data)
-testing_data = scale(testing_data)
+training_data = as.matrix(wine_data[tmp,])
+training_labels = as.matrix(labels[tmp,])
+testing_data = as.matrix(wine_data[-tmp,])
+testing_labels = as.matrix(labels[-tmp,])
 ```
 
 #Building and evaluating the model
@@ -114,8 +101,7 @@ testing_data = scale(testing_data)
 # Adding dropout made this perform worse by a lot
 model = keras_model_sequential() %>%
   layer_dense(units = 100, activation = "relu", input_shape = ncol(training_data)) %>%
-  layer_dense(units = 100, activation = "relu") %>%
-  layer_dense(units = 100, activation = "relu") %>%
+  layer_dense(units = 100, activation = "relu",kernel_regularizer=keras$regularizers$L1(0.01)) %>%
   layer_dense(units = 100, activation = "relu") %>%
   layer_dense(units = ncol(training_labels), activation = "softmax")
 
@@ -129,11 +115,10 @@ model %>%
 fit(
   x = training_data,
   y = training_labels,
-  epochs = 60, #similar to regression model, more means lower loss and better accuracy
-  batch_size = 50 #keeping this smaller (50 vs 100) improved performance
+  epochs = 50, #similar to regression model, more means lower loss and better accuracy
 )
 
-model %>% evaluate(testing_data, testing_labels) #results from training still different from evaluated, why?
+model %>% evaluate(testing_data, testing_labels)
 
 predictions = model %>% predict(testing_data)
 
@@ -141,7 +126,6 @@ head(predictions)
 head(testing_labels)
 
 ```
-
 
 
 
