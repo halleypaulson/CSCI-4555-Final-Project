@@ -1,13 +1,7 @@
----
-title: "Project Writeup"
-author: "Halley Paulson and Machi Iwata"
-date: "4/25/2022"
-output: pdf_document
----
+Halley Paulson and Machi Iwata
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+Elena Machkasova
+
 
 # Project Background
 The purpose of this study is to generate insights into each of the factors in our model's white wine quality and to determine which features of white (red) wines are establishing the quality indicators. According to this website, there are over 10,000 wine varieties in the world, even considering only the grapes kinds, therefore, for many people, figuring out which wine is a good quality wine can be difficult. By using a neural network, we can build regression model and classification model to predict whether a particular wine is good quality or not. For this project, we used the data from the website of the UCI Machine Learning Repository. (https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/). Our hypotheses for this topic are that 
