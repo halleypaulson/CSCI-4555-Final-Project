@@ -33,6 +33,9 @@ white_wine = read.csv('wine_data/winequality-white.csv', sep=';')
 library(psych)
 corPlot(white_wine)
 ```
+![image1](https://github.com/halleypaulson/CSCI-4555-Final-Project/blob/main/correlation.png)
+
+
 
 # Method
 In this project, we are using multilayer perceptron for neural network to predict the white wine quality. <!-- I need your help with the "why" part-->
