@@ -4,7 +4,7 @@ author: "Halley Paulson and Machi Iwata"
 date: "4/18/2022"
 output: html_document
 ---
-#How to run code
+# How to run code
 Make sure keras and tensorflow are installed. Make sure wine data csv is in correct location. This document can then simply be knitted or 
 code blocks can be run.
 ```{r setup, include=FALSE}
@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(keras)
 ```
 
-#Data
+# Data
 This data has features pertaining to wine measurements to determine quality.
 Entries: 4898
 Features: 12
@@ -22,88 +22,95 @@ Features: 12
   #https://archive.ics.uci.edu/ml/datasets/wine+quality
   #https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/
 
-#red_wine = read.csv('wine_data/winequality-red.csv', sep=';')
-white_wine = read.csv('wine_data/winequality-white.csv', sep=';')
+wine_data = read.csv('wine_data/winequality-white.csv', sep=';')
 
 ```
 
-#Regression Model
-##Preprocessing and creating sets
+# Regression Model  
+## Preprocessing and creating sets
 ```{r}
-wine_data = white_wine
-labels = data.frame(as.numeric(wine_data$quality))
-wine_data = scale(subset(wine_data,select=-c(quality)))
-summary(wine_data)
+#No highly correlated features - using all features to predict quality
+labels_reg = data.frame(as.numeric(wine_data$quality))
+
+#scales all features so for all columns mean=0 and sd=1
+wine_data_scaled = scale(subset(wine_data,select=-c(quality)))
  
 sample_size = 3918 #80% of full set for training, 20% for testing
 set.seed(4898)
 
-tmp = sample(seq_len(nrow(wine_data)),size = sample_size)
-training_data = as.matrix(wine_data[tmp,])
-training_labels = as.matrix(labels[tmp,])
-testing_data = as.matrix(wine_data[-tmp,])
-testing_labels = as.matrix(labels[-tmp,])
+tmp = sample(seq_len(nrow(wine_data_scaled)),size = sample_size)
+reg_training_data = as.matrix(wine_data_scaled[tmp,])
+reg_training_labels = as.matrix(labels_reg[tmp,])
+reg_testing_data = as.matrix(wine_data_scaled[-tmp,])
+reg_testing_labels = as.matrix(labels_reg[-tmp,])
 ```
 
-#Building and evaluating the model
+# Building model
 ```{r}
-#Adding more layers didn't change much, adding more nodes helped decrease loss by around .2, dropout made it perform worse
+#More layers reduced performance
+#More nodes increased performance
+#Couldn't see much performance difference between L1 vs L2 vs L1L2
 model = keras_model_sequential() %>%
-  layer_dense(units = 100, activation = "relu", input_shape = ncol(training_data)) %>%
+  layer_dense(units = 100, activation = "relu", input_shape = ncol(reg_training_data)) %>%
   layer_dense(units = 100, activation = "relu", kernel_regularizer=keras$regularizers$L1L2(0.01,0.01)) %>%
   layer_dense(units = 100, activation = "relu",kernel_regularizer=keras$regularizers$L1L2(0.01,0.01)) %>%
   layer_dense(units = 100, activation = "relu") %>%
-  layer_dense(units = ncol(training_labels), activation = "linear")
+  layer_dense(units = ncol(reg_training_labels), activation = "linear")
 
 model %>% compile(
   loss = 'mean_squared_error', #finds average squared difference between predicted and actual
   optimizer = 'adam',
 )
 
-#summary(model)
-
 model %>% 
 fit(
-  x = training_data,
-  y = training_labels,
-  epochs = 50, #trials showed that more epochs = lower loss
-   #smaller batches in combination with high epochs was beneficial
+  x = reg_training_data,
+  y = reg_training_labels,
+  epochs = 45, #trials showed that more epochs = lower loss, but after regularization it wasn't necessary to have 60
+  #smaller batches in combination with high epochs was beneficial before regularization, after it didn't change anything
 )
+```
 
-model %>% evaluate(testing_data,testing_labels)
+## Evaulating model
+```{r}
+model %>% evaluate(reg_testing_data,reg_testing_labels)
 
-predictions = model %>% predict(testing_data)
-comparison = data.frame(cbind(actual=testing_labels,predicted=predictions))
+predictions = model %>% predict(reg_testing_data)
+comparison = data.frame(cbind(actual=reg_testing_labels,predicted=predictions))
 colnames(comparison) = c('Actual','Predicted')
 
 head(comparison)
 ```
 
-#Classification Model
-##Preprocessing and creating sets
+\clearpage
+
+# Classification Model  
+## Preprocessing and creating sets
 ```{r}
-wine_data = white_wine #tried with full set of features and half and it didn't effect loss much. Decided to keep full set
-labels = data.frame(to_categorical(wine_data$quality))
-wine_data = scale(subset(wine_data,select=-c(quality)))
+labels_clas = data.frame(to_categorical(wine_data$quality))
+wine_data_scaled = scale(subset(wine_data,select=-c(quality)))
  
-sample_size = 3000 #80% of full set for training, 20% for testing
+sample_size = 3918 #tried with smaller training size
 set.seed(4898)
 
-tmp = sample(seq_len(nrow(wine_data)),size = sample_size)
-training_data = as.matrix(wine_data[tmp,])
-training_labels = as.matrix(labels[tmp,])
-testing_data = as.matrix(wine_data[-tmp,])
-testing_labels = as.matrix(labels[-tmp,])
+tmp = sample(seq_len(nrow(wine_data_scaled)),size = sample_size)
+clas_training_data = as.matrix(wine_data_scaled[tmp,])
+clas_training_labels = as.matrix(labels_clas[tmp,])
+clas_testing_data = as.matrix(wine_data_scaled[-tmp,])
+clas_testing_labels = as.matrix(labels_clas[-tmp,])
 ```
 
-#Building and evaluating the model
+## Building model
 ```{r}
-# Adding dropout made this perform worse by a lot
+#Performed better with 50 nodes in each compared to 100
+#Performed better with dropout than with regularization
 model = keras_model_sequential() %>%
-  layer_dense(units = 100, activation = "relu", input_shape = ncol(training_data)) %>%
-  layer_dense(units = 100, activation = "relu",kernel_regularizer=keras$regularizers$L1(0.01)) %>%
-  layer_dense(units = 100, activation = "relu") %>%
-  layer_dense(units = ncol(training_labels), activation = "softmax")
+  layer_dense(units = 50, activation = "relu", input_shape = ncol(clas_training_data)) %>%
+  layer_dense(units = 50, activation = "relu") %>%
+  layer_dropout(0.3) %>%
+  layer_dense(units = 50, activation = "relu") %>%
+  layer_dense(units = 50, activation = "relu") %>%
+  layer_dense(units = ncol(clas_training_labels), activation = "softmax")
 
 model %>% compile(
   loss = 'categorical_crossentropy',
@@ -113,19 +120,20 @@ model %>% compile(
 
 model %>% 
 fit(
-  x = training_data,
-  y = training_labels,
-  epochs = 50, #similar to regression model, more means lower loss and better accuracy
+  x = clas_training_data,
+  y = clas_training_labels,
+  epochs = 45,
 )
-
-model %>% evaluate(testing_data, testing_labels)
-
-predictions = model %>% predict(testing_data)
-
-head(predictions)
-head(testing_labels)
-
 ```
+
+## Evaluating model
+```{r}
+model %>% evaluate(clas_testing_data, clas_testing_labels)
+predictions = model %>% predict(clas_testing_data)
+head(predictions) #Better at predicting 7 and terrible at predicting 9
+head(clas_training_labels)
+```
+
 
 
 
